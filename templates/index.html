@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign Up</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .card {
+            background: #fff;
+            width: 100%;
+            max-width: 420px;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .card h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-size: 1.6rem;
+            color: #111;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.9rem;
+            margin-bottom: 0.4rem;
+            color: #333;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.7rem 0.8rem;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            border-color: #667eea;
+        }
+
+        .error {
+            font-size: 0.8rem;
+            color: #e63946;
+            margin-top: 0.3rem;
+            display: none;
+        }
+
+        .success {
+            font-size: 0.85rem;
+            color: #2a9d8f;
+            margin-bottom: 1rem;
+            text-align: center;
+            display: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: 10px;
+            border: none;
+            background: #667eea;
+            color: #fff;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 0.8rem;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #5a67d8;
+        }
+
+        .hint {
+            font-size: 0.75rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <h2>Create Account</h2>
+
+        <div class="success" id="successMsg">
+            Account created successfully 🎉
+        </div>
+         <div class="error" id="errorMsg">
+            Something Went Wrong
+        </div>
+
+        <form id="signupForm" action="/api/submit" method="post">
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" name="name" />
+                <div class="error" id="nameError">Name is required</div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" />
+                <div class="error" id="emailError">Enter a valid email</div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" />
+                <div class="hint">At least 8 characters, 1 number</div>
+                <div class="error" id="passwordError">
+                    Password must be at least 8 characters and include a number
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <input type="password" id="confirmPassword" />
+                <div class="error" id="confirmPasswordError">
+                    Passwords do not match
+                </div>
+            </div>
+
+            <button type="submit">Sign Up</button>
+        </form>
+    </div>
+
+    <script>
+        const form = document.getElementById("signupForm");
+
+        form.addEventListener("submit", function (e) {
+
+            e.preventDefault()
+            // Inputs
+            const name = document.getElementById("name");
+            const email = document.getElementById("email");
+            const password = document.getElementById("password");
+            const confirmPassword = document.getElementById("confirmPassword");
+
+            // Errors
+            const nameError = document.getElementById("nameError");
+            const emailError = document.getElementById("emailError");
+            const passwordError = document.getElementById("passwordError");
+            const confirmPasswordError = document.getElementById("confirmPasswordError");
+            const successMsg = document.getElementById("successMsg");
+              const errorMsg = document.getElementById("errorMsg");
+
+
+            let isValid = true;
+
+            // Reset
+            [nameError, emailError, passwordError, confirmPasswordError].forEach(e => e.style.display = "none");
+            successMsg.style.display = "none";
+
+            // Name validation
+            if (name.value.trim() === "") {
+                nameError.style.display = "block";
+                isValid = false;
+            }
+
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email.value.trim())) {
+                emailError.style.display = "block";
+                isValid = false;
+            }
+
+            // Password validation
+            const passwordRegex = /^(?=.*\d).{8,}$/;
+            if (!passwordRegex.test(password.value)) {
+                passwordError.style.display = "block";
+                isValid = false;
+            }
+
+            // Confirm password
+            if (password.value !== confirmPassword.value || confirmPassword.value === "") {
+                confirmPasswordError.style.display = "block";
+                isValid = false;
+            }
+
+        
+
+            if (isValid) {
+                fetch("/api/submit", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        name: name.value.trim(),
+                        email: email.value.trim(),
+                        password: password.value
+                    })
+                })
+                    // .then(res => res.json())
+                    .then(data => {
+                        window.location.href="http://127.0.0.1:5000/complete"
+                    })
+                    .catch(err => {
+                        errorMsg.style.display = "block";
+                        console.error(err);
+                    });
+            }
+        });
+    </script>
+</body>
+
+</html>
